@@ -1,8 +1,14 @@
 local M = {}
 
+-- TODO: Integrate star command with telescope
+-- TODO: Integrate stop command with telescope
+
+---@alias buffer number: Buffer number
+-----------------------------------------------------
+--      [[ tasks.lua data type definition ]]
 ---@class TasksDef
----@field default_group string: Name of group which is run by default, if not set, run without grup name will finish with error
----@field default_task string: Name of task which is run by default, if not set, run without task name will finish with error
+---@field default_group string | nil: Default group to execute
+---@field default_task string | nil: Default task to execute
 ---@field groups GroupDef[]: Array of groups
 ---@field tasks TaskDef[]: Array of tasks
 
@@ -10,18 +16,19 @@ local M = {}
 ---@field name string: Name of the task
 ---@field exec string: Command to execute
 ---@field keep_output boolean: By default buffer associaded with tash will be deleted, to keep output set this to true
----@field working_dir string: Working directory for executed command
+---@field working_dir string: Working directory for executed command, if path starts with "/" then is treated as a absolute path.
 
 ---@class GroupDef
----@field name string: Name of group of tasks
----@field tasks string[]: Array of tasks to execute for group
+---@field name string: Group name of tasks
+---@field tasks string[]: Tasks to execute for given group
+-----------------------------------------------------
 
 ---@class Task
----@field task_id integer: Job id
----@field buf_id integer | buffer: Buffer number
+---@field task_id integer: Task id
+---@field buf_id buffer: Buffer number
 ---@field task_def TaskDef: Task definition
 
----@param buf integer | buffer
+---@param buf buffer
 ---@param data string[]
 local function add_to_buffer(buf, data)
 	local count = vim.api.nvim_buf_line_count(buf)
@@ -56,15 +63,14 @@ local function run_task(task_def)
 	-- Searching for exising buffer with name
 	local buffers = vim.api.nvim_list_bufs()
 	for _, buf in ipairs(buffers) do
-		local n = vim.api.nvim_buf_get_name(buf)
 		if vim.api.nvim_buf_get_name(buf) == vim.loop.cwd() .. "/" .. target_buf_name then
 			buf_id = buf
 		end
 	end
 
-	--Create new buffer
+	-- Create new buffer if not exists
 	if not buf_id then
-		buf_id = vim.api.nvim_create_buf(true, true)
+		buf_id = vim.api.nvim_create_buf(not M._opts.telescope, true)
 		if buf_id == 0 then
 			vim.notify("Cannot create buffer", vim.log.levels.ERROR)
 			return nil
@@ -72,6 +78,7 @@ local function run_task(task_def)
 		vim.api.nvim_buf_set_name(buf_id, target_buf_name)
 	end
 
+	-- Configure working direcory for command
 	local cwd = nil
 	if task_def.working_dir and #task_def.working_dir > 0 then
 		if task_def.working_dir:find("^/") == 1 then
@@ -94,6 +101,7 @@ local function run_task(task_def)
 			if status == 0 and not task_def.keep_output then
 				vim.api.nvim_buf_delete(buf_id, { force = true })
 			end
+			vim.api.nvim_buf_set_option(buf_id, "buflisted", true)
 			delete_task(channel)
 			vim.notify("Task [" .. task_def.name .. "] is finished.")
 		end,
@@ -221,7 +229,6 @@ M.stop = function(task_name)
 end
 
 M.stop_all = function()
-	print("Stop tasks")
 	for _, task in ipairs(M._tasks) do
 		vim.notify("Requesting to stop task: [" .. task.task_def.name .. "]")
 		vim.fn.jobstop(task.task_id)
@@ -234,14 +241,19 @@ M.stop_all = function()
 	vim.notify("All tasks has been stopped", vim.log.levels.INFO)
 end
 
+---@return Task[]
 M.list = function()
-	if #M._tasks == 0 then
-		vim.notify("There is no running tasks", vim.log.levels.INFO)
-		return
-	end
-	for _, task in ipairs(M._tasks) do
-		vim.notify("[" .. task.task_id .. "] " .. task.task_def.name, vim.log.levels.INFO)
-	end
+	return M._tasks or {}
 end
 
+---@class Config
+---@field telescope boolean: If true telescope integration will be enabled
+
+---@param opts Config
+M.setup = function(opts)
+	M._opts = opts
+	if opts.telescope then
+		require("runner.telescope").register_extension()
+	end
+end
 return M
