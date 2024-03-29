@@ -24,8 +24,8 @@ lazy.nvim
 
 # Telescope (when telescope integration is enabed)
 - Telescope runner list
-- Telescope runner start_task
-- Telescope runner start_group
+- Telescope runner run_task
+- Telescope runner run_group
 - Telescope runner stop
 
 # Example: tasks.lua

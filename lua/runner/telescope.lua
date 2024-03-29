@@ -146,8 +146,8 @@ return {
 		local ext = require("telescope").register_extension({
 			exports = {
 				list = list,
-				start_task = run_task,
-				start_group = run_group,
+				run_task = run_task,
+				run_group = run_group,
 				stop = stop_task,
 				runner = list,
 			},
