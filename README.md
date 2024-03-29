@@ -16,14 +16,19 @@ lazy.nvim
 ```
 
 # Commands
-
 - RunnerRunGroup [group name]
 - RunnerRunTask [task name]
 - RunnerList
 - RunnerStop <task name>
 - RunnerStopAll
 
-# Example tasks.lua
+# Telescope (when telescope integration is enabed)
+- Telescope runner list
+- Telescope runner start_task
+- Telescope runner start_group
+- Telescope runner stop
+
+# Example: tasks.lua
 ```lua
 return {
 	default_group = "dev",

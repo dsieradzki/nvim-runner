@@ -103,7 +103,7 @@ local function run_task(task_def)
 			end
 			vim.api.nvim_buf_set_option(buf_id, "buflisted", true)
 			delete_task(channel)
-			vim.notify("Task [" .. task_def.name .. "] is finished.")
+			vim.notify("Task [" .. task_def.name .. "] is finished.", vim.log.levels.INFO)
 		end,
 		on_stdout = function(_, data)
 			if data then
@@ -172,6 +172,13 @@ M.run_task = function(task_name)
 		return
 	end
 
+	for _, running_tasks in ipairs(M._tasks) do
+		if running_tasks.task_def.name == task_name_to_run then
+			vim.notify("Task [" .. task_name_to_run .. "] is already running", vim.log.levels.WARN)
+			return
+		end
+	end
+
 	for _, task_to_create in ipairs(tasks_def.tasks) do
 		if task_to_create.name == task_name_to_run then
 			run_task(task_to_create)
@@ -230,7 +237,7 @@ end
 
 M.stop_all = function()
 	for _, task in ipairs(M._tasks) do
-		vim.notify("Requesting to stop task: [" .. task.task_def.name .. "]")
+		vim.notify("Requesting to stop task: [" .. task.task_def.name .. "]", vim.log.levels.INFO)
 		vim.fn.jobstop(task.task_id)
 	end
 	-- Clean tasks
@@ -244,6 +251,16 @@ end
 ---@return Task[]
 M.list = function()
 	return M._tasks or {}
+end
+
+---@return TaskDef[] | nil
+M.list_all_tasks = function()
+	return load_tasks_file().tasks
+end
+
+---@return GroupDef[] | nil
+M.list_all_groups = function()
+	return load_tasks_file().groups
 end
 
 ---@class Config
