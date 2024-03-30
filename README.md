@@ -17,7 +17,7 @@ lazy.nvim
     config = function()
       require('runner').setup {
         --true|false(default): When integration with telescope is enabled, buffer is not shown on buffer list, unless task finish with error, or keep output is enabled in task, then buffer is unhidden
-        telescope = false,
+        telescope = true,
       }
 
       -- Example mappings, before apply check are not conflicting with your current mappints

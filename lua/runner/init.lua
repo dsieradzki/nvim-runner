@@ -54,7 +54,9 @@ local function run_task(task_def)
 		return nil
 	end
 
-	local buf_id = nil
+	---@type buffer
+	local buf_id
+
 	local target_buf_name = "Task: " .. task_def.name
 
 	-- Searching for exising buffer with name
@@ -97,8 +99,9 @@ local function run_task(task_def)
 		on_exit = function(channel, status)
 			if status == 0 and not task_def.keep_output then
 				vim.api.nvim_buf_delete(buf_id, { force = true })
+			else
+				vim.api.nvim_buf_set_option(buf_id, "buflisted", true)
 			end
-			vim.api.nvim_buf_set_option(buf_id, "buflisted", true)
 			delete_task(channel)
 			vim.notify("Task [" .. task_def.name .. "] is finished.", vim.log.levels.INFO)
 		end,
