@@ -1,8 +1,5 @@
 local M = {}
 
--- TODO: Integrate star command with telescope
--- TODO: Integrate stop command with telescope
-
 ---@alias buffer number: Buffer number
 -----------------------------------------------------
 --      [[ tasks.lua data type definition ]]

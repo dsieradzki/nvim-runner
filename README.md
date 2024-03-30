@@ -6,11 +6,29 @@ lazy.nvim
 ```lua
   {
     'dsieradzki/nvim-runner'
+    
+    dependencies = {
+      -- Only when telescope integration is enabled
+      'nvim-telescope/telescope.nvim', -- optional
+
+      -- Only when you want to use which-key in mappings in example below
+      'folke/which-key.nvim', -- optional
+    },
     config = function()
       require('runner').setup {
         --true|false(default): When integration with telescope is enabled, buffer is not shown on buffer list, unless task finish with error, or keep output is enabled in task, then buffer is unhidden
         telescope = false,
       }
+
+      -- Example mappings, before apply check are not conflicting with your current mappints
+      require('which-key').register {
+        ['<leader>m'] = { name = 'Task runner', _ = 'which_key_ignore' },
+      }
+      vim.keymap.set('n', '<leader>mr', ':Telescope runner run_task<CR>', { desc = '[R]un task', silent = true })
+      vim.keymap.set('n', '<leader>mg', ':Telescope runner run_group<CR>', { desc = 'Run [G]roup of tasks', silent = true })
+      vim.keymap.set('n', '<leader>ml', ':Telescope runner list<CR>', { desc = '[L]ist running tasks', silent = true })
+      vim.keymap.set('n', '<leader>ms', ':Telescope runner stop<CR>', { desc = '[S]op task', silent = true })
+      vim.keymap.set('n', '<leader>mS', ':RunnerStopAll<CR>', { desc = '[S]op all tasks', silent = true })
     end,
   },
 ```
