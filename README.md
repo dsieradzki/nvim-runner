@@ -5,7 +5,7 @@ This is experimental plugin for running generic tasks with definition saved in w
 lazy.nvim
 ```lua
   {
-    'dsieradzki/nvim-runner'
+    'dsieradzki/nvim-runner',
     
     dependencies = {
       -- Only when telescope integration is enabled
